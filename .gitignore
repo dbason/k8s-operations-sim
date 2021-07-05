@@ -1,0 +1,16 @@
+bin
+testbin/*
+*.test
+**/__debug_bin
+*.out
+.vscode
+.idea
+*.swp
+*~
+tilt_modules/
+
+# Distribution/packaging
+dist/
+build/
+
+/.dapper
