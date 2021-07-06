@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"os"
 	"time"
 
 	"github.com/dbason/k8s-operations-sim/pkg/operations"
@@ -13,43 +14,59 @@ import (
 )
 
 const (
-	simNamespace = "opni-sim"
+	defaultNamespace = "opni-sim"
+	defaultInterval  = "5m"
 )
 
 var (
-	deleteObjects = true
+	intervalString string
+	namespace      string
 )
 
 func BuildRunCmd() *cobra.Command {
-	return &cobra.Command{
+	var runCmd = &cobra.Command{
 		Use:   "run",
 		Short: "Run the opni k8s simulation tool",
 		RunE:  doK8sOperations,
 	}
+
+	runCmd.Flags().StringVar(&intervalString, "interval", defaultInterval, "interval in minutes to run operations")
+	runCmd.Flags().StringVar(&namespace, "namespace", defaultNamespace, "namespace to create objects in (will be created)")
+
+	return runCmd
 }
 
 func doK8sOperations(cmd *cobra.Command, args []string) error {
 	common.Log.Info("Starting k8s operations")
-	operationInterval := time.Duration(1) * time.Minute
+	operationInterval, err := time.ParseDuration(intervalString)
+	if err != nil {
+		common.Log.Errorf("invalid interval string %v", err)
+		os.Exit(1)
+	}
 	if err := common.K8sClient.Create(cmd.Context(), &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: simNamespace,
+			Name: namespace,
 		},
 	}); errors.IsAlreadyExists(err) {
 		common.Log.Debug(err)
 	} else if err != nil {
 		return err
 	}
-	common.Log.Infof("Namespace %s created", simNamespace)
+	common.Log.Infof("Namespace %s created", namespace)
 
 	shouldDeleteObjects := newShouldDeleteObjects()
 	doDelete := func() {
-		operations.DeleteK8sApp(simNamespace, cmd.Context())
+		operations.DeleteK8sApp(cmd.Context())
+		operations.DeleteDaemonSet(cmd.Context())
+		operations.DeleteCronJob(cmd.Context())
 	}
 	doCreate := func() {
-		operations.CreateK8sApp(simNamespace, cmd.Context())
-		time.Sleep(time.Duration(30) * time.Second)
-		operations.DeleteRandomAppPod(simNamespace, cmd.Context())
+		operations.CreateK8sApp(namespace, cmd.Context())
+		operations.CreateDaemonSet(namespace, cmd.Context())
+		operations.CreateCronJob(namespace, cmd.Context(), operationInterval)
+		time.Sleep(time.Duration(15) * time.Second)
+		operations.DeleteRandomAppPod(namespace, cmd.Context())
+		operations.DeleteRandomDaemonSetPod(namespace, cmd.Context())
 	}
 
 	doCreate()

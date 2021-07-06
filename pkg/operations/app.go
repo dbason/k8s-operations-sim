@@ -110,40 +110,37 @@ func CreateK8sApp(namespace string, ctx context.Context) {
 	service = buildService()
 	ingress = buildIngress()
 
-	common.Log.Infof("Creating deployment %s", deployment.Name)
+	common.Log.Infof("Creating Deployment %s", deployment.Name)
 	deployment.SetNamespace(namespace)
 	if err := common.K8sClient.Create(ctx, &deployment); err != nil {
 		common.Log.Error(err)
 	}
 
-	common.Log.Infof("Creating service %s", service.Name)
+	common.Log.Infof("Creating Service %s", service.Name)
 	service.SetNamespace(namespace)
 	if err := common.K8sClient.Create(ctx, &service); err != nil {
 		common.Log.Error(err)
 	}
 
-	common.Log.Infof("Creating ingress %s", ingress.Name)
+	common.Log.Infof("Creating Ingress %s", ingress.Name)
 	ingress.SetNamespace(namespace)
 	if err := common.K8sClient.Create(ctx, &ingress); err != nil {
 		common.Log.Error(err)
 	}
 }
 
-func DeleteK8sApp(namespace string, ctx context.Context) {
-	common.Log.Infof("Deleting deployment %s", deployment.Name)
-	deployment.SetNamespace(namespace)
+func DeleteK8sApp(ctx context.Context) {
+	common.Log.Infof("Deleting Deployment %s", deployment.Name)
 	if err := common.K8sClient.Delete(ctx, &deployment); err != nil {
 		common.Log.Error(err)
 	}
 
-	common.Log.Infof("Deleting service %s", service.Name)
-	service.SetNamespace(namespace)
+	common.Log.Infof("Deleting Service %s", service.Name)
 	if err := common.K8sClient.Delete(ctx, &service); err != nil {
 		common.Log.Error(err)
 	}
 
-	common.Log.Infof("Deleting ingress %s", ingress.Name)
-	ingress.SetNamespace(namespace)
+	common.Log.Infof("Deleting Ingress %s", ingress.Name)
 	if err := common.K8sClient.Delete(ctx, &ingress); err != nil {
 		common.Log.Error(err)
 	}
@@ -167,7 +164,7 @@ func DeleteRandomAppPod(namespace string, ctx context.Context) {
 	randomSource := rand.NewSource(time.Now().UnixNano())
 	randomNumber := rand.New(randomSource)
 	podIndex := randomNumber.Intn(len(podList.Items))
-	common.Log.Infof("Deleting pod %s", podList.Items[podIndex].Name)
+	common.Log.Infof("Deleting Pod %s", podList.Items[podIndex].Name)
 	if err := common.K8sClient.Delete(ctx, &podList.Items[podIndex]); err != nil {
 		common.Log.Error(err)
 	}
