@@ -90,9 +90,12 @@ func DeleteStatefulset(ctx context.Context, namespace string) {
 	if err := common.K8sClient.Delete(ctx, &statefulset); err != nil {
 		common.Log.Error(err)
 	}
-
+	common.Log.Info("Deleting all persistent volume claims")
+	if err := common.K8sClient.DeleteAllOf(ctx, &v1.PersistentVolumeClaim{}, client.InNamespace(namespace)); err != nil {
+		common.Log.Error(err)
+	}
 	common.Log.Info("Deleting all persistent volumes")
-	if err := common.K8sClient.DeleteAllOf(ctx, &v1.PersistentVolume{}, client.InNamespace(namespace)); err != nil {
+	if err := common.K8sClient.DeleteAllOf(ctx, &v1.PersistentVolume{}); err != nil {
 		common.Log.Error(err)
 	}
 }
