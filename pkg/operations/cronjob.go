@@ -58,7 +58,7 @@ func buildCronJob(cronExpression string) batchv1beta1.CronJob {
 	}
 }
 
-func CreateCronJob(namespace string, ctx context.Context, interval time.Duration) {
+func CreateCronJob(ctx context.Context, namespace string, interval time.Duration) {
 	cronExpression := util.SplitDurationIntoCron(interval, desiredIterations)
 	cronJob = buildCronJob(cronExpression)
 

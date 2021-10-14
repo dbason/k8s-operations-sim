@@ -105,7 +105,7 @@ func buildIngress() networkingv1beta1.Ingress {
 	}
 }
 
-func CreateK8sApp(namespace string, ctx context.Context) {
+func CreateK8sApp(ctx context.Context, namespace string) {
 	deployment = buildDeployment()
 	service = buildService()
 	ingress = buildIngress()
@@ -146,7 +146,7 @@ func DeleteK8sApp(ctx context.Context) {
 	}
 }
 
-func DeleteRandomAppPod(namespace string, ctx context.Context) {
+func DeleteRandomAppPod(ctx context.Context, namespace string) {
 	// Get list of pods matching deploymetn selector
 	podList := &v1.PodList{}
 	selector, err := metav1.LabelSelectorAsSelector(deployment.Spec.Selector)

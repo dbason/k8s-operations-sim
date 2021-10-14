@@ -20,6 +20,7 @@ const (
 
 var (
 	intervalString string
+	addPVC         bool
 	namespace      string
 )
 
@@ -32,6 +33,7 @@ func BuildRunCmd() *cobra.Command {
 
 	runCmd.Flags().StringVar(&intervalString, "interval", defaultInterval, "interval in minutes to run operations")
 	runCmd.Flags().StringVar(&namespace, "namespace", defaultNamespace, "namespace to create objects in (will be created)")
+	runCmd.Flags().BoolVar(&addPVC, "addpvc", false, "add a statefulset with a PVC")
 
 	return runCmd
 }
@@ -59,14 +61,20 @@ func doK8sOperations(cmd *cobra.Command, args []string) error {
 		operations.DeleteK8sApp(cmd.Context())
 		operations.DeleteDaemonSet(cmd.Context())
 		operations.DeleteCronJob(cmd.Context())
+		if addPVC {
+			operations.DeleteStatefulset(cmd.Context(), namespace)
+		}
 	}
 	doCreate := func() {
-		operations.CreateK8sApp(namespace, cmd.Context())
-		operations.CreateDaemonSet(namespace, cmd.Context())
-		operations.CreateCronJob(namespace, cmd.Context(), operationInterval)
+		operations.CreateK8sApp(cmd.Context(), namespace)
+		operations.CreateDaemonSet(cmd.Context(), namespace)
+		operations.CreateCronJob(cmd.Context(), namespace, operationInterval)
+		if addPVC {
+			operations.CreateStatefulset(cmd.Context(), namespace)
+		}
 		time.Sleep(time.Duration(15) * time.Second)
-		operations.DeleteRandomAppPod(namespace, cmd.Context())
-		operations.DeleteRandomDaemonSetPod(namespace, cmd.Context())
+		operations.DeleteRandomAppPod(cmd.Context(), namespace)
+		operations.DeleteRandomDaemonSetPod(cmd.Context(), namespace)
 	}
 
 	doCreate()

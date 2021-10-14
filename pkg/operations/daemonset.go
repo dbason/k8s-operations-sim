@@ -49,7 +49,7 @@ func buildDaemonSet() appsv1.DaemonSet {
 	}
 }
 
-func CreateDaemonSet(namespace string, ctx context.Context) {
+func CreateDaemonSet(ctx context.Context, namespace string) {
 	daemonSet = buildDaemonSet()
 
 	common.Log.Infof("Creating DaemonSet %s", daemonSet.Name)
@@ -66,7 +66,7 @@ func DeleteDaemonSet(ctx context.Context) {
 	}
 }
 
-func DeleteRandomDaemonSetPod(namespace string, ctx context.Context) {
+func DeleteRandomDaemonSetPod(ctx context.Context, namespace string) {
 	// Get list of pods matching deploymetn selector
 	podList := &v1.PodList{}
 	selector, err := metav1.LabelSelectorAsSelector(daemonSet.Spec.Selector)
