@@ -79,7 +79,7 @@ func buildStatefulset() appsv1.StatefulSet {
 func CreateStatefulset(ctx context.Context, namespace string) {
 	statefulset = buildStatefulset()
 	common.Log.Infof("Creating Statefulset %s", statefulset.Name)
-	deployment.SetNamespace(namespace)
+	statefulset.SetNamespace(namespace)
 	if err := common.K8sClient.Create(ctx, &statefulset); err != nil {
 		common.Log.Error(err)
 	}
